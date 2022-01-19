@@ -7,23 +7,24 @@ const app = express();
 
 app.use(cors());
 
+app.get('/', async (req, res) => {
+  res.send('Hello there friend!')
+})
+
 app.get('/secret', async (req, res) => {
   if (req.query.amount) {
     const amount = req.query.amount
 
-    try {
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: amount,
-        currency: 'usd',
-        payment_method_types: ['card'],
-      });
-    } catch (error) {
-      res.status(400).json({ error: { message: error.message } })
-    }
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: 'usd',
+      payment_method_types: ['card'],
+      metadata: { integration_check: 'accept_a_payment' },
+    });
 
     res.json({
       payment_intent_id: paymentIntent.id,
-      client_secret: paymentIntent.client_secret
+      client_secret: paymentIntent.client_secret,
     })
 
   } else {
